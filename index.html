@@ -8,18 +8,18 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <style>
     :root {
-      --bg: #0f0f0f;
-      --bg2: #161616;
-      --bg3: #1e1e1e;
-      --gold: #b48240;
-      --gold-l: #d4a45c;
-      --gold-p: rgba(180,130,64,0.10);
-      --gold-b: rgba(180,130,64,0.18);
-      --white: #f0f0f0;
-      --muted: #686868;
-      --border: #272727;
-      --red: #e05555;
-      --green: #4caf82;
+      --bg: #f0f0f0;
+      --bg2: #ffffff;
+      --bg3: #f5f5f5;
+      --gold: #a87030;
+      --gold-l: #c8903a;
+      --gold-p: rgba(168,112,48,0.08);
+      --gold-b: rgba(168,112,48,0.22);
+      --white: #111111;
+      --muted: #888888;
+      --border: #e0e0e0;
+      --red: #d94444;
+      --green: #2e9e6a;
       --radius: 10px;
     }
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -33,9 +33,9 @@
 
     /* ── HEADER ── */
     .app-header {
-      background: var(--bg2);
-      border-bottom: 1px solid var(--gold-b);
-      padding: 10px 16px;
+      background: #111111;
+      border-bottom: 1px solid rgba(168,112,48,0.3);
+      padding: 7px 16px;
       display: flex;
       align-items: center;
       gap: 12px;
@@ -43,7 +43,7 @@
       top: 0;
       z-index: 100;
     }
-    .app-logo { height: 30px; object-fit: contain; }
+    .app-logo { height: 42px; object-fit: contain; }
     .app-title {
       font-size: 11px;
       letter-spacing: 3px;
@@ -111,7 +111,7 @@
     .input:focus, .select:focus, .textarea:focus { border-color: var(--gold); }
     .input[readonly] { opacity: 0.7; cursor: default; }
     .textarea { resize: vertical; min-height: 80px; line-height: 1.55; }
-    .select option { background: #1e1e1e; }
+    .select option { background: #ffffff; color: #111111; }
     .select { cursor: pointer; }
 
     /* ── PROJECT INFO GRID ── */
@@ -195,7 +195,7 @@
     .upload-area input[type=file] { display: none; }
     .upload-icon { font-size: 22px; margin-bottom: 5px; }
     .upload-lbl { font-size: 12px; color: var(--muted); letter-spacing: 0.5px; }
-    .upload-sub { font-size: 10px; color: #3a3a3a; margin-top: 3px; }
+    .upload-sub { font-size: 10px; color: #aaaaaa; margin-top: 3px; }
 
     /* ── PHOTO PREVIEWS ── */
     .photos-wrap {
@@ -282,9 +282,9 @@
       bottom: 24px;
       left: 50%;
       transform: translateX(-50%) translateY(10px);
-      background: #1e1e1e;
+      background: #111111;
       border: 1px solid var(--gold-b);
-      color: var(--white);
+      color: #f0f0f0;
       padding: 10px 20px;
       border-radius: 20px;
       font-size: 13px;
@@ -367,23 +367,9 @@
 
     <!-- Project auto-fill info -->
     <div id="proj-info" style="display:none">
-      <div class="proj-grid">
-        <div>
-          <div class="info-lbl">TIPO</div>
-          <div class="info-val" id="pi-tipo">—</div>
-        </div>
-        <div>
-          <div class="info-lbl">SUPERFICIE</div>
-          <div class="info-val" id="pi-m2">—</div>
-        </div>
-        <div>
-          <div class="info-lbl">RESPONSABLE</div>
-          <div class="info-val" id="pi-resp">—</div>
-        </div>
-        <div>
-          <div class="info-lbl">ETAPA ACTUAL</div>
-          <div><span class="badge-etapa" id="pi-etapa">—</span></div>
-        </div>
+      <div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--border)">
+        <div class="info-lbl">ETAPA ACTUAL</div>
+        <div style="margin-top:4px"><span class="badge-etapa" id="pi-etapa">—</span></div>
       </div>
     </div>
 
@@ -612,9 +598,6 @@ function onProyChange() {
   if (!id) { infoEl.style.display = 'none'; return; }
   const p = _proyectos.find(x => x.id === id);
   if (!p) return;
-  document.getElementById('pi-tipo').textContent = p.tipo || '—';
-  document.getElementById('pi-m2').textContent = p.m2 ? `${p.m2} m²` : '—';
-  document.getElementById('pi-resp').textContent = p.resp || '—';
   document.getElementById('pi-etapa').textContent = ETAPAS[p.etapa] || p.etapa || '—';
   infoEl.style.display = 'block';
 }
