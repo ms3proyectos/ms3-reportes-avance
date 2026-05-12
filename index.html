@@ -999,24 +999,28 @@ async function generatePDF() {
     const pdfBlob = doc.output('blob');
     const pdfFile = new File([pdfBlob], fileName, { type: 'application/pdf' });
 
-    // On mobile use native share sheet (WhatsApp, email, etc.)
-    if (navigator.share && navigator.canShare && navigator.canShare({ files: [pdfFile] })) {
-      await navigator.share({
-        files: [pdfFile],
-        title: `Reporte de Avance — ${projName}`,
-      });
-    } else {
-      // Desktop fallback: direct download
-      doc.save(fileName);
-    }
-
     incFolio();
     document.getElementById('inp-folio').value = formatFolio();
     toast('PDF generado ✓');
 
+    // On mobile use native share sheet (WhatsApp, email, etc.)
+    // Separated from PDF generation so a share-cancel doesn't show as error
+    if (navigator.share && navigator.canShare && navigator.canShare({ files: [pdfFile] })) {
+      try {
+        await navigator.share({ files: [pdfFile], title: `Reporte de Avance — ${projName}` });
+      } catch (shareErr) {
+        // AbortError = user cancelled share sheet — not a real error
+        if (shareErr.name !== 'AbortError') {
+          doc.save(fileName); // fallback to download if share fails for real
+        }
+      }
+    } else {
+      doc.save(fileName);
+    }
+
   } catch (e) {
     console.error(e);
-    toast('Error al generar PDF — intenta de nuevo');
+    toast('Error al generar PDF: ' + (e.message || e));
   } finally {
     setLoading(false);
   }
