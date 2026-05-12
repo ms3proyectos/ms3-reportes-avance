@@ -752,8 +752,6 @@ async function generatePDF() {
       ['PROYECTO', projName],
       ['FOLIO', folio],
       ['FECHA', fecha],
-      ['RESPONSABLE', proj.resp || '—'],
-      ['TIPO / SUPERFICIE', `${proj.tipo || '—'}  ·  ${proj.m2 ? proj.m2 + ' m²' : '—'}`],
       ['ETAPA', ETAPAS[proj.etapa] || proj.etapa || '—'],
     ];
     if (obs) rows.push(['OBSERVACIONES', obs]);
@@ -790,8 +788,8 @@ async function generatePDF() {
       const sec = _sections[secId];
       if (!sec.desc.trim() && !sec.photos.length) continue;
 
-      // Section separator
-      if (y + 20 > P.MAX_Y) { y = newPage(); }
+      // Each section always starts on a new page
+      y = newPage();
 
       // Line + label
       doc.setDrawColor(...P.GOLD);
