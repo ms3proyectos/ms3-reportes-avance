@@ -824,13 +824,27 @@ async function generatePDF() {
     // ── Total pages ──
     if (typeof doc.putTotalPages === 'function') doc.putTotalPages(TP);
 
-    // ── Save ──
+    // ── Save / Share ──
     const safeName = projName.replace(/[^a-zA-Z0-9_\-]/g, '_');
-    doc.save(`MS3_Reporte_${safeName}_${folio}.pdf`);
+    const fileName = `MS3_Reporte_${safeName}_${folio}.pdf`;
+
+    const pdfBlob = doc.output('blob');
+    const pdfFile = new File([pdfBlob], fileName, { type: 'application/pdf' });
+
+    // On mobile use native share sheet (WhatsApp, email, etc.)
+    if (navigator.share && navigator.canShare && navigator.canShare({ files: [pdfFile] })) {
+      await navigator.share({
+        files: [pdfFile],
+        title: `Reporte de Avance — ${projName}`,
+      });
+    } else {
+      // Desktop fallback: direct download
+      doc.save(fileName);
+    }
 
     incFolio();
     document.getElementById('inp-folio').value = formatFolio();
-    toast('PDF generado ✓  Revisa tu carpeta de descargas');
+    toast('PDF generado ✓');
 
   } catch (e) {
     console.error(e);
