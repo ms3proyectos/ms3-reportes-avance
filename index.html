@@ -1004,14 +1004,17 @@ async function generatePDF() {
     toast('PDF generado ✓');
 
     // On mobile use native share sheet (WhatsApp, email, etc.)
-    // Separated from PDF generation so a share-cancel doesn't show as error
-    if (navigator.share && navigator.canShare && navigator.canShare({ files: [pdfFile] })) {
+    // Try share directly — skip canShare() check (returns false on some Android browsers
+    // even when files ARE shareable). Fall back to download only on real failure.
+    if (navigator.share) {
       try {
         await navigator.share({ files: [pdfFile], title: `Reporte de Avance — ${projName}` });
       } catch (shareErr) {
-        // AbortError = user cancelled share sheet — not a real error
-        if (shareErr.name !== 'AbortError') {
-          doc.save(fileName); // fallback to download if share fails for real
+        if (shareErr.name === 'AbortError') {
+          // User cancelled share sheet — PDF is already generated, nothing to do
+        } else {
+          // Real failure (e.g. browser doesn't support file sharing) — download instead
+          doc.save(fileName);
         }
       }
     } else {
