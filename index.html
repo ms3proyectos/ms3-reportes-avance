@@ -464,6 +464,7 @@
 
   <!-- GENERATE PDF -->
   <button class="btn-pdf" id="btn-pdf" onclick="generatePDF()">GENERAR PDF ↓</button>
+  <button class="btn-pdf" id="btn-share" onclick="sharePDF()" style="display:none;background:#25d366;margin-top:8px">📤 COMPARTIR PDF</button>
 
   <div style="height:30px"></div>
 </div>
@@ -999,26 +1000,29 @@ async function generatePDF() {
     const pdfBlob = doc.output('blob');
     const pdfFile = new File([pdfBlob], fileName, { type: 'application/pdf' });
 
+    // Store for sharePDF() button
+    window._lastPdfFile = pdfFile;
+    window._lastPdfName = fileName;
+    window._lastDoc     = doc;
+
     incFolio();
     document.getElementById('inp-folio').value = formatFolio();
+    document.getElementById('btn-share').style.display = '';
     toast('PDF generado ✓');
 
-    // On mobile use native share sheet (WhatsApp, email, etc.)
-    // Try share directly — skip canShare() check (returns false on some Android browsers
-    // even when files ARE shareable). Fall back to download only on real failure.
-    if (navigator.share) {
+    // Auto-download on desktop; on mobile just show the share button
+    if (!navigator.share) {
+      doc.save(fileName);
+    } else {
+      // Try native share immediately on mobile
       try {
         await navigator.share({ files: [pdfFile], title: `Reporte de Avance — ${projName}` });
       } catch (shareErr) {
-        if (shareErr.name === 'AbortError') {
-          // User cancelled share sheet — PDF is already generated, nothing to do
-        } else {
-          // Real failure (e.g. browser doesn't support file sharing) — download instead
+        if (shareErr.name !== 'AbortError') {
+          // Share truly not supported — fall back to download
           doc.save(fileName);
         }
       }
-    } else {
-      doc.save(fileName);
     }
 
   } catch (e) {
@@ -1027,6 +1031,24 @@ async function generatePDF() {
   } finally {
     setLoading(false);
   }
+}
+
+async function sharePDF() {
+  const pdfFile = window._lastPdfFile;
+  const doc     = window._lastDoc;
+  const name    = window._lastPdfName;
+  if (!pdfFile) { toast('Genera el PDF primero'); return; }
+
+  if (navigator.share) {
+    try {
+      await navigator.share({ files: [pdfFile], title: name });
+      return;
+    } catch (e) {
+      if (e.name === 'AbortError') return; // user cancelled
+    }
+  }
+  // Fallback: download
+  doc.save(name);
 }
 
 // ── Draw letterhead on current page ──────────────────────
